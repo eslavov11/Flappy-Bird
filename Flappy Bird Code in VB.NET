@@ -1,0 +1,243 @@
+Public Class Form1
+
+    Dim movement As Single = 0
+    Dim gravity As Single = 1
+    Dim timers As Boolean
+    Dim collision As Boolean
+
+
+    Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        'HIDING THE PIPES IN THE BEGINNING
+        Label1.Visible = False
+        Label2.Visible = False
+        Label3.Visible = False
+        Label4.Visible = False
+        Label5.Visible = False
+        Label6.Visible = False
+
+        'FULL SCREEN /console
+
+        CenterToScreen()
+        Me.WindowState = FormWindowState.Maximized
+        Me.FormBorderStyle = Windows.Forms.FormBorderStyle.None
+
+    End Sub
+
+
+    Private Sub Form1_KeyDown(sender As Object, e As KeyEventArgs) Handles Me.KeyDown
+
+        'SPACE MOVEMENT
+        If e.KeyCode = Keys.Space And PictureBox1.Top > Me.ClientRectangle.Top And collision = False Then
+
+            movement = -15
+
+        End If
+
+    End Sub
+
+
+    Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+        'VARIABLE FOR THE GRAVITY
+        movement += gravity
+        PictureBox1.Top += movement
+
+        'SETTING THE RIGHT SIZE FOR THE BOTTOM PIPES
+        Label2.Height = 900
+        Label4.Height = 900
+        Label6.Height = 900
+
+        'CHECK FOR RETURNING PIPES
+        If Label1.Right <= Me.ClientRectangle.Left Then
+
+            Label1.Visible = True
+            Label2.Visible = True
+
+            Label1.Left += 1440
+            Me.Label1.Size = New System.Drawing.Size(100, CInt(Math.Ceiling(Rnd() * 450)) + 100)
+
+            Label2.Left += 1440
+            Label2.Top = Label1.Bottom + 250
+
+        End If
+
+        'SETTING THE UPPER PIPES IN THE LEFT LOCATION
+        If Label3.Right <= Me.ClientRectangle.Left Then
+
+            Label3.Visible = True
+            Label4.Visible = True
+
+            Label3.Left += 1440
+            Me.Label3.Size = New System.Drawing.Size(100, CInt(Math.Ceiling(Rnd() * 450)) + 100)
+
+            Label4.Left += 1440
+            Label4.Top = Label3.Bottom + 250
+
+        End If
+
+        'SETTING THE PIPES BACK IN THE START
+        If Label5.Right <= Me.ClientRectangle.Left Then
+
+            Label5.Visible = True
+            Label6.Visible = True
+
+            Label5.Left += 1440
+            Me.Label5.Size = New System.Drawing.Size(100, CInt(Math.Ceiling(Rnd() * 450)) + 100)
+
+            Label6.Left += 1440
+            Label6.Top = Label5.Bottom + 250
+
+        End If
+
+    End Sub
+
+
+    Private Sub Timer2_Tick(sender As Object, e As EventArgs) Handles Timer2.Tick
+
+        'COLLISION CHECK
+        If PictureBox1.Bounds.IntersectsWith(Label1.Bounds) And Label1.Visible = True _
+        Or PictureBox1.Bounds.IntersectsWith(Label2.Bounds) And Label2.Visible = True _
+        Or PictureBox1.Bounds.IntersectsWith(Label3.Bounds) And Label3.Visible = True _
+        Or PictureBox1.Bounds.IntersectsWith(Label4.Bounds) And Label4.Visible = True _
+        Or PictureBox1.Bounds.IntersectsWith(Label5.Bounds) And Label5.Visible = True _
+        Or PictureBox1.Bounds.IntersectsWith(Label6.Bounds) And Label6.Visible = True Then
+
+            collision = True
+
+        End If
+
+        'GAME OVER SCREEN
+        If collision = True Then
+
+            Timer1.Enabled = False
+            Timer2.Enabled = False
+            Timer3.Enabled = True
+            Timer4.Enabled = False
+            movement = 0
+            Label7.Text = "Game Over"
+            Label7.BringToFront()
+            Label7.Visible = True
+
+            Label1.Visible = False
+            Label2.Visible = False
+            Label3.Visible = False
+            Label4.Visible = False
+            Label5.Visible = False
+            Label6.Visible = False
+
+
+            PlayAgain.Visible = True
+            exxit.Visible = True
+
+        End If
+
+        'PIPES SPEED
+        Label1.Left -= 2
+        Label2.Left -= 2
+        Label3.Left -= 2
+        Label4.Left -= 2
+        Label5.Left -= 2
+        Label6.Left -= 2
+
+        'INIT COUNTER
+        If PictureBox1.Right = Label5.Left And Label5.Visible = True Then
+
+            counter.Text += 1
+
+        End If
+
+        'COUNTER
+        If PictureBox1.Right = Label3.Left And Label3.Visible = True Then
+
+            counter.Text += 1
+
+        End If
+
+        'COUNTER FOR THE PIPES
+        If PictureBox1.Right = Label1.Left And Label1.Visible = True Then
+
+            counter.Text += 1
+
+        End If
+
+        'GAME OVER WHEN FALLING TO THE GROUND
+        If PictureBox1.Bottom >= Me.ClientRectangle.Bottom Then
+            collision = True
+        End If
+
+    End Sub
+
+
+    Private Sub Timer3_Tick(sender As Object, e As EventArgs) Handles Timer3.Tick
+
+        'COLLISION DETECTED
+        movement += gravity
+        PictureBox1.Top += movement
+
+    End Sub
+
+
+    Private Sub Timer4_Tick(sender As Object, e As EventArgs) Handles Timer4.Tick
+
+        If timers = True Then
+
+            'PLAY AGAIN
+            Timer3.Enabled = False
+            Timer1.Enabled = True
+            Timer2.Enabled = True
+
+        End If
+
+    End Sub
+    Private Sub Play_Click(sender As Object, e As EventArgs) Handles Play.Click
+
+        'GAME START
+        exxit.Visible = False
+        Play.Visible = False
+        Timer1.Enabled = True
+        Timer2.Enabled = True
+        Label7.Visible = False
+
+    End Sub
+
+
+    Private Sub exxit_Click(sender As Object, e As EventArgs) Handles exxit.Click
+
+        'EXIT
+        Close()
+
+    End Sub
+
+
+    Private Sub PlayAgain_Click(sender As Object, e As EventArgs) Handles PlayAgain.Click
+
+        'RESET SETTINGS
+        counter.Text = 0
+        exxit.Visible = False
+        PlayAgain.Visible = False
+        movement = 0
+        timers = True
+        collision = False
+        Timer4.Enabled = True
+        Label7.Visible = False
+
+        'SETTING STARTING LOCATION OF BIRD AND PIPES
+        PictureBox1.Location = New Point(Me.ClientRectangle.X + 615, Me.ClientRectangle.Y + 381)
+        Label1.Location = New Point(Me.ClientRectangle.X + 0, Me.ClientRectangle.Y + 0)
+        Label2.Location = New Point(Me.ClientRectangle.X + 0, Me.ClientRectangle.Y + 798)
+        Label3.Location = New Point(Me.ClientRectangle.X + 470, Me.ClientRectangle.Y + 0)
+        Label4.Location = New Point(Me.ClientRectangle.X + 470, Me.ClientRectangle.Y + 798)
+        Label5.Location = New Point(Me.ClientRectangle.X + 940, Me.ClientRectangle.Y + 0)
+        Label6.Location = New Point(Me.ClientRectangle.X + 940, Me.ClientRectangle.Y + 798)
+
+        'TEPORARY HIDE PIPES
+        Label1.Visible = False
+        Label2.Visible = False
+        Label3.Visible = False
+        Label4.Visible = False
+        Label5.Visible = False
+        Label6.Visible = False
+
+    End Sub
+
+End Class
